@@ -1,10 +1,10 @@
 /**
- * [Function used to determine if a property is null]
+ * [Function used to determine if a property is undefined]
  * @param  {[string or numbere]}  prop [value to check]
  * @return {Boolean}      [defined status]
  */
 function isDefined(prop) {
-	if (prop === null || prop === '') {
+	if (typeof prop === "undefined") {
 		return false
 	} else {
 		return true;
@@ -34,19 +34,16 @@ function printQuote() {
 	if (isDefined(randomQuote.citation)) {
 		html += '<span class="citation">' + randomQuote.citation + '</span>';
 	}
-	if (isDefined(randomQuote.date)) {
-		html += '<span class="year">' + randomQuote.date + '</span>';
+	if (isDefined(randomQuote.year)) {
+		html += '<span class="year">' + randomQuote.year + '</span>';
 	}
 	html += '</p>';
 	quoteBox.innerHTML = html;
-	changeBackground();
-
-	/*<p class="quote">You can do anything but not everything</p>
-      <p class="source">David Allen<span class="citation">Making It All Work</span><span class="year">2009</span></p>*/
+	changeBackground(); // update body/button background and quote change
 }
 
 /**
- * [Function used to generate a random CSS rgb color strng]
+ * [Function used to generate a random CSS rgb color string]
  * @return {[string]} [random CSS rgb color string]
  */
 function randomRGB() {
