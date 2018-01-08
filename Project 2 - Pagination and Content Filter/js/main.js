@@ -1,4 +1,5 @@
 (function() {
+
 	var $page = $( '.page' ),
 		$listItems = $( '.student-item' ),
 		$pagination = $( '.pagination' ),
@@ -13,28 +14,33 @@
 		return Math.ceil(len/10);
 	}
 
-	/**
-	 * Function used to determine the page the user has selected
-	 * @return {number} [active page] 
-	 */
-	function getActivePage(e) {
-		e.preventDefault();
-		var $activePage = $( e.target );
-		var $pageLinks = $( '.pagination ul li' );
-		for (let i = 0; i < $pageLinks.length; i++) {
-			var $pageLink = $( $pageLinks[i] );
-			$pageLink.find( 'a' ).removeClass('active');
+	function showPage(pageNo, listItems) {
+		var upperBound = pageNo * 10,
+			lowerBound = upperBound - 9;
+
+		for (let i = 0; i < listItems.length; i++) {
+			if (i >= lowerBound && i <= upperBound) {
+				$( listItems[i] ).show();		
+			} else {
+				$( listItems[i] ).hide();
+			}
+
 		}
-		$activePage.addClass('active')
 	}
 
-	/**
-	 * Function used to set active pagination list item
-	 */
-	function setActivePage(page) {
-		var $pageLinks = $( '.pagination ul li' );
-		var $activePage = $( $pageLinks[page] );
-		$activePage.find( 'a' ).addClass('active');
+	function getPage(e) {
+		e.preventDefault();
+		var activePage = e.target;
+		var pageNo = parseInt($( activePage ).text());
+		setActivePage(pageNo, $( '.pagination li' ));
+		showPage(pageNo, $( 'li.student-item' ));
+	}
+
+	function setActivePage(pageNo, pageLinks) {
+		for (var i = 0; i < pageLinks.length; i++) {
+			$( pageLinks[i] ).find('a').removeClass("active");
+		}
+		$( pageLinks[pageNo - 1] ).find('a').addClass('active');
 	}
 
 	/**
@@ -58,15 +64,10 @@
 		}
 		html += '</ul></div>';
 		$page.append(html);
-		$( '.pagination ul').on("click", getActivePage)		
-		setActivePage(0);
-	}
-
-	// hide all list items except for the first 10
-	for (let i = 0; i < listLength; i++) {
-		if ( i > 10 ) {
-			$($listItems[i]).hide();
-		}
+		showPage(1, $( 'li.student-item' ))
+		$( '.pagination ul').on("click", getPage)
+		setActivePage(1, $( '.pagination li' ));		
+		//setActivePage(0);
 	}
 
 	buildPagination(pagesNeeded);
