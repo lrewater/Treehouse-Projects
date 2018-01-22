@@ -117,3 +117,8 @@ body{
       background-color: #4ba6c3;
       color: #fff;
     }
+
+.search-alert {
+  color: #4ba6c3;
+  font-size: 1.3rem;
+}
