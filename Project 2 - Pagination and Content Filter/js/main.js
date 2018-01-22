@@ -4,10 +4,24 @@
 		$list = $( 'ul.student-list' ),
 		$listItems = $( '.student-item' ),
 		$pagination = $( '.pagination' ),
-		$search = $( '.student-search input' ),
-		$searchBtn = $( '.student-search button' ),
+		$pageHeader = $( '.page-header' ),
+		$search,
+		$searchBtn,
 		listLength = $listItems.length,
 		pagesNeeded = calcPagesNeeded(listLength);
+
+	/**
+	 * Function used to append search box to the page
+	*/
+	(function buildSearchBox() {
+		var html = `<div class="student-search">
+          <input placeholder="Search for students...">
+          <button>Search</button>
+        </div>`;
+        $pageHeader.append(html);
+        $search = $( '.student-search input' ), // update variable with DOM reference after HTML is appended
+		$searchBtn = $( '.student-search button' ); // update variable with DOM reference after HTML is appended
+	})();
 
 	/**
 	 * Function used to calculate the number of pagination links needed
