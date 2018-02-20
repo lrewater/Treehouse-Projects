@@ -175,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		// Email Validation
+		// pattern found at https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
 		var emailRegEx = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
 		if ( !emailRegEx.test($emailInput.value) || $emailInput.value === "" ) {
@@ -194,6 +195,30 @@ document.addEventListener("DOMContentLoaded", () => {
 			$activities.querySelector("legend").style.color = "#184f68";
 		}
 
+		// Credit Card Validation
+		if ($paymentSelect.value === "credit card") {
+			const $ccNum = $form.querySelector("#cc-num"),
+				  $zip = $form.querySelector("#zip"),
+				  $cvv = $form.querySelector("#cvv");
+
+			if (isNaN($ccNum) && ($ccNum.value.length > 16 || $ccNum.value.length < 13) ) {
+				setFormErrorStyle($ccNum, false);
+			} else {
+				setFormErrorStyle($ccNum, true);
+			}
+
+			if (isNaN($zip) && $zip.value.length !== 5 ) {
+				setFormErrorStyle($zip, false);
+			} else {
+				setFormErrorStyle($zip, true);
+			}
+
+			if (isNaN($cvv) && $cvv.value.length !== 3 ) {
+				setFormErrorStyle($cvv, false);
+			} else {
+				setFormErrorStyle($cvv, true);
+			}
+		}
 
 	}
 
