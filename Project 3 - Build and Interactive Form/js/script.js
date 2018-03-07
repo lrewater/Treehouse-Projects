@@ -69,6 +69,27 @@ document.addEventListener("DOMContentLoaded", () => {
 	})();
 
 	/**
+	 * Function used to initialize the dropdown with a placeholder value
+	 * @param  {object} e      [event object]
+	 * @param  {object} select [Select element to append options to]
+	 */
+	function initializeDropdown(select) {
+		const $select = select,
+			  $options = $select.querySelectorAll("option");
+			  
+		$options.forEach(function(v) {
+			hide(v);
+		})
+
+		const $placeholder = document.createElement("option");
+		$placeholder.textContent = "Please select a t-shirt design";
+		$placeholder.value = "placeholder";
+		$placeholder.classList.add("placeholder");
+		$select.appendChild($placeholder);
+		$select.value = "placeholder";
+	}
+
+	/**
 	 * Function used to set the select options based on the design chosen by the user
 	 * @param  {object} e      [event object]
 	 * @param  {object} select [Select element to append options to]
@@ -81,16 +102,18 @@ document.addEventListener("DOMContentLoaded", () => {
 		$options.forEach(function(v) {
 			let attr = v.getAttribute("data-design");
 			if (val === attr) {
-				v.style.display = "";
+				show(v);
 			} else {
-				v.style.display = "none";
+				hide(v);
 			}
 		})
 
 		if ( val === 'js puns' ) {
 			$select.value = jsPunstshirtColors[0].value;
-		} else {
+		} else if (val === 'heart js' ) {
 			$select.value = iLvjstshirtColors[0].value;
+		} else {
+			$select.value = "placeholder";
 		}
 	}
 	
@@ -339,6 +362,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// hide other job title on page load
 	hide($otherTitle);
+
+	// Add a placeholder to t shirt color options until a design is selected
+	initializeDropdown($tshirtColors);
 
 	// Hide t shirt colors dropdown and label until a design is selected
 	hide($tshirtColors);
