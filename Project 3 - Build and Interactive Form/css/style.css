@@ -179,3 +179,18 @@ button:hover {
 		width: 49%;
 	}
 }
+
+/* ================================= 
+  Custom Styles
+==================================== */
+
+.error-message {
+	display: inline-block;
+	background-color: #df6161;
+	color: #FFF;
+	margin-bottom: 10px;
+	padding: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+}

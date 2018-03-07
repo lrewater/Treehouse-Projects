@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+	// Declare const variables
 	const $form = document.querySelector("form"),
+		  $nameInput = $form.querySelector("#name"),
+		  $emailInput = $form.querySelector("#mail")
 		  $jobTitle = $form.querySelector("select#title"),
 		  $otherTitle = $form.querySelector("#other-title"),
 		  $tshirtDesign = $form.querySelector("#design"),
@@ -10,14 +14,47 @@ document.addEventListener("DOMContentLoaded", () => {
 		  $paymentSelect = $form.querySelector("#payment"),
 		  $creditSection = $form.querySelector("#credit-card"),
 		  $paypalSection = $form.querySelector("#paypal"),
-		  $bitcoinSection = $form.querySelector("#bitcoin");
+		  $bitcoinSection = $form.querySelector("#bitcoin"),
+		  $ccNumInput = $form.querySelector("#cc-num"),
+		  $zipInput = $form.querySelector("#zip"),
+		  $cvvInput = $form.querySelector("#cvv");
 
+	// Declare let variables
 	let jsPunstshirtColors = [],
 	  	iLvjstshirtColors = [],
 	  	selectedActivyTimes = [],
 	  	selectedCourseCosts = [];
 
+	// Function used to calculate sum
 	const sum = (a, b) => a + b;
+
+	// Function used to add a class to an element
+	const addClass = (element, className) => {
+		if ( !element.classList.contains(className)) {
+			element.classList.add(className);
+		}
+	}
+
+	// pattern found at https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
+	const emailRegEx = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+	
+	/**
+	 * Function used to show an HTML element
+	 * @param  {object} target [HTML element to show]
+	 * @return {[type]}        [description]
+	 */
+	function show(target) {
+		target.style.display = "";
+	}
+
+	/**
+	 * Function used to hide an HTML element
+	 * @param  {object} target [HTML element to hide]
+	 * @return {[type]}        [description]
+	 */
+	function hide(target) {
+		target.style.display = "none";
+	}
 
 	/**
 	 * This function is used to populate an array of t-shirt options for each design
@@ -88,7 +125,12 @@ document.addEventListener("DOMContentLoaded", () => {
 					selectedActivyTimes.push(labelSubstring)
 				}
 			}
-			
+		})
+
+		// After selectedActivityTimes array is built up,
+		// check to see if any activities occur during the same time slot
+		$activityLabels.forEach(function(v,k) {
+			let labelSubstring = v.textContent.split(" — ")[1].split(", ")[0];
 			if ( v.textContent !== labelText && selectedActivyTimes.includes(labelSubstring) && !v.firstElementChild.checked) {
 				v.style.color = "#777";
 				v.firstElementChild.disabled = true;
@@ -98,11 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		})
 
-		// Display the total cost of the selected activies if cost is greater than 0
+		// Display the total cost of the selected activities if cost is greater than 0
 		const $totalCost = document.querySelector("#total-cost");
 		let cost = calculateTotalCost();
 		if (cost > 0) {
 			$totalCost.textContent = 'Total Cost: $' + calculateTotalCost();
+			$totalCost.style.color = "#184f68";
 		} else {
 			$totalCost.textContent = "";
 		}
@@ -135,17 +178,79 @@ document.addEventListener("DOMContentLoaded", () => {
 		const val = e.target.value;			
 
 		if ( val === "paypal") {
-			$paypalSection.style.display = "";
-			$creditSection.style.display = "none";
-			$bitcoinSection.style.display = "none";
+			show($paypalSection)
+			hide($creditSection);
+			hide($bitcoinSection);
 		} else if ( val === "bitcoin") {
-			$paypalSection.style.display = "none";
-			$creditSection.style.display = "none";
-			$bitcoinSection.style.display = "";
+			hide($paypalSection);
+			hide($creditSection);
+			show($bitcoinSection);
 		} else {
-			$paypalSection.style.display = "none";
-			$creditSection.style.display = "";
-			$bitcoinSection.style.display = "none";
+			hide($paypalSection);
+			show($creditSection);
+			hide($bitcoinSection);
+		}
+	}
+
+	/**
+	 * Function used to determine if form element values are valid
+	 * @param  {object} target [HTML element that is being validated]
+	 */
+	function checkValid(target) {
+		const id = target.id;
+		const classes = target.classList;
+
+		// name validation
+		if ( id === 'name' ) {
+			if ( target.value === "") {
+				displayFormError(target, false, "Please specificy a name.");
+			} else {
+				displayFormError(target, true);
+			}
+		} else if ( id === "mail" ) {
+			if ( !emailRegEx.test(target.value) || target.value === "" ) {
+				displayFormError(target, false, "Please specificy a valid email address.");
+			} else {
+				displayFormError(target, true);
+			}
+		} else if (classes.contains("activities")) {
+			const checkboxesArray = [];
+			// Activities Validation
+			$activityCheckboxes.forEach(function(v,k) {
+				if ( v.checked ) { checkboxesArray.push(v); }
+			})
+			if  ( checkboxesArray.length === 0 ) {
+				displayFormError($activities, false, "Please register for at least one activity.")
+			} else {
+				displayFormError($activities, true)
+			}
+		} else if ( id === "cc-num" ) {
+			// Credit Card Validation
+			if ($paymentSelect.value === "credit card") {
+				if (target.value === "" ) {
+					displayFormError(target, false, "Please enter a credit card number");
+				} else if (target.value.length > 16 || target.value.length < 13) {
+					displayFormError(target, false, "Please specificy a valid credit card number between 13 and 16 digits");
+				} else {
+					displayFormError(target, true);
+				}
+			}
+		} else if ( id === "zip" ) {
+			if ($paymentSelect.value === "credit card") {
+				if (target.value === "" || target.value.length !== 5 ) {
+					displayFormError(target, false, "Please specificy a 5 digit valid zip code");
+				} else {
+					displayFormError(target, true);
+				}
+			}
+		} else if ( id === "cvv" ) {
+			if ($paymentSelect.value === "credit card") {
+				if (target.value === "" || target.value.length !== 3 ) {
+					displayFormError(target, false, "Please specificy a valid 3 digit CVV");
+				} else {
+					displayFormError(target, true);
+				}
+			}				
 		}
 	}
 
@@ -162,93 +267,122 @@ document.addEventListener("DOMContentLoaded", () => {
 	 * 		+ zip (5 digits, number)
 	 * 		+ CVV (3 digit, number)
 	 */
-	function validateForm() {
-		const $nameInput = $form.querySelector("#name"),
-			  $emailInput = $form.querySelector("#mail"),
-			  checkboxesArray = [];
-
-		// Name Validation
-		if ( $nameInput.value === "" ) {
-			setFormErrorStyle($nameInput, false);
-		} else {
-			setFormErrorStyle($nameInput, true);
+	function validateForm(type, target, message) {
+		if ( type === "submit" ) {
+			checkValid($nameInput);
+			checkValid($emailInput);
+			checkValid($activities);
+			checkValid($ccNumInput);
+			checkValid($zipInput);
+			checkValid($cvvInput);			
+		} else if ( type === "blur" ) {
+			checkValid(target);
+		} else if ( type === "keyup" ) {
+			checkValid(target);
 		}
-
-		// Email Validation
-		// pattern found at https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
-		var emailRegEx = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-
-		if ( !emailRegEx.test($emailInput.value) || $emailInput.value === "" ) {
-			setFormErrorStyle($emailInput, false);
-		} else {
-			setFormErrorStyle($emailInput, true);
-		}
-
-		// Activities Validation
-		$activityCheckboxes.forEach(function(v,k) {
-			if ( v.checked ) { checkboxesArray.push(v); }
-		})
-
-		if  ( checkboxesArray.length === 0 ) {
-			$activities.querySelector("legend").style.color = "#af2020";
-		} else {
-			$activities.querySelector("legend").style.color = "#184f68";
-		}
-
-		// Credit Card Validation
-		if ($paymentSelect.value === "credit card") {
-			const $ccNum = $form.querySelector("#cc-num"),
-				  $zip = $form.querySelector("#zip"),
-				  $cvv = $form.querySelector("#cvv");
-
-			if (isNaN($ccNum) && ($ccNum.value.length > 16 || $ccNum.value.length < 13) ) {
-				setFormErrorStyle($ccNum, false);
-			} else {
-				setFormErrorStyle($ccNum, true);
-			}
-
-			if (isNaN($zip) && $zip.value.length !== 5 ) {
-				setFormErrorStyle($zip, false);
-			} else {
-				setFormErrorStyle($zip, true);
-			}
-
-			if (isNaN($cvv) && $cvv.value.length !== 3 ) {
-				setFormErrorStyle($cvv, false);
-			} else {
-				setFormErrorStyle($cvv, true);
-			}
-		}
-
 	}
 
-	function setFormErrorStyle(target, valid) {
-		if ( !valid ) {
+	/**
+	 * Function used to remove error message
+	 * @param  {object} target [HTML element to remove error message from]
+	 */
+	function removeErrorMessage(target) {
+		const tagName = target.tagName.toLowerCase();
+		let errorSpan;
+
+		if ( tagName === "fieldset" ) {
+			errorSpan = target.firstElementChild;
+		} else {
+			errorSpan = target.previousElementSibling;
+		}
+
+		if ( errorSpan.classList.contains('error-message') ) {
+			errorSpan.remove();
+		}
+	}
+
+	/**
+	 * Function used to display and remove form errors
+	 * @param  {object} target  [The HTML element to display/remove the message for]
+	 * @param  {boolean} valid   [boolean indicating form state]
+	 * @param  {string} message [Error message to display]
+	 */
+	function displayFormError(target, valid, message) {
+		const tagName = target.tagName.toLowerCase();
+		if ( !valid && tagName === "input") {
 			target.style.border = "2px solid #df6161";
 			target.style.backgroundColor = "#ffdada";
-		} else {
+		} else if ( !valid && tagName === "fieldset") {
+			target.style.color = "#af2020";
+		} else if (tagName === "input") {
 			target.style.border = "2px solid #c1deeb";
 			target.style.backgroundColor = "#c1deeb";
+		} else if (tagName === "fieldset") {
+			target.style.color = "#184f68";
+		}
+
+		if ( !valid ) {
+			removeErrorMessage(target);
+			const error = document.createElement("span");
+			error.textContent = message;
+			addClass(error, 'error-message');
+			target.insertAdjacentElement('beforeBegin', error)
+			if (tagName === "fieldset") {
+				target.insertAdjacentElement('afterBegin', error);
+			} else {
+				target.insertAdjacentElement('beforeBegin', error)
+			}
+		} else {
+			removeErrorMessage(target);
 		}
 	}
 
-	//	display other job title on page load
-	$otherTitle.style.display = "none";
+	// hide other job title on page load
+	hide($otherTitle);
+
+	// Hide t shirt colors dropdown and label until a design is selected
+	hide($tshirtColors);
+	hide($tshirtColors.previousElementSibling);
 
 	// set default value and display for payment section
 	$paymentSelect.value = "credit card";
-	$paypalSection.style.display = "none";
-	$bitcoinSection.style.display = "none";
+	hide($paypalSection);
+	hide($bitcoinSection);
 
 	// define behavior for when the user changes their job title
-	// if user selects other, display text inpuit that lets
+	// if user selects other, display text input that lets
 	// them define other job title
 	$jobTitle.addEventListener("change", (e) => {
 		const val = e.target.value;
 		val === "other" ? $otherTitle.style.display = "" : $otherTitle.style.display = "none";
 	})
 
+	/**
+	 * Function used to bind javascript events
+	 * @param  {object} target [HTML element to bind even to]
+	 * @param  {string} type   [even type]
+	 */
+	function bindEvent(target, type) {
+		target.addEventListener(type, (e) => {
+			validateForm(e.type, e.target);
+		})
+	}
+
+	// Bind Events
+	bindEvent($nameInput, 'blur');
+	bindEvent($emailInput, 'blur');
+	bindEvent($ccNumInput, 'blur');
+	bindEvent($zipInput, 'blur');
+	bindEvent($cvvInput, 'blur');
+	bindEvent($nameInput, 'keyup');
+	bindEvent($emailInput, 'keyup');
+	bindEvent($ccNumInput, 'keyup');
+	bindEvent($zipInput, 'keyup');
+	bindEvent($cvvInput, 'keyup');
+
 	$tshirtDesign.addEventListener("change", (e) => {
+		show($tshirtColors);
+		show($tshirtColors.previousElementSibling);
 		buildDropdown(e, $tshirtColors);
 	})
 
@@ -262,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	$form.addEventListener("submit", (e) => {
 		e.preventDefault();
-		validateForm();
+		validateForm(e.type);
 	})
 
 
