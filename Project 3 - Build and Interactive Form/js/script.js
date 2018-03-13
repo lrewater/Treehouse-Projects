@@ -218,21 +218,27 @@ document.addEventListener("DOMContentLoaded", () => {
 	/**
 	 * Function used to determine if form element values are valid
 	 * @param  {object} target [HTML element that is being validated]
+	 * @return {boolen} [boolean indicating whether an error was encountered]
 	 */
 	function checkValid(target) {
-		const id = target.id;
-		const classes = target.classList;
+		const id = target.id,
+			  classes = target.classList;
+		
+		// boolean indicating whether an error was encountered
+		let error = false;
 
 		// name validation
 		if ( id === 'name' ) {
 			if ( target.value === "") {
 				displayFormError(target, false, "Please specificy a name.");
+				error = true;
 			} else {
 				displayFormError(target, true);
 			}
 		} else if ( id === "mail" ) {
 			if ( !emailRegEx.test(target.value) || target.value === "" ) {
 				displayFormError(target, false, "Please specificy a valid email address.");
+				error = true;
 			} else {
 				displayFormError(target, true);
 			}
@@ -243,17 +249,20 @@ document.addEventListener("DOMContentLoaded", () => {
 				if ( v.checked ) { checkboxesArray.push(v); }
 			})
 			if  ( checkboxesArray.length === 0 ) {
-				displayFormError($activities, false, "Please register for at least one activity.")
+				displayFormError($activities, false, "Please register for at least one activity.");
+				error = true;
 			} else {
-				displayFormError($activities, true)
+				displayFormError($activities, true);
 			}
 		} else if ( id === "cc-num" ) {
 			// Credit Card Validation
 			if ($paymentSelect.value === "credit card") {
 				if (target.value === "" ) {
 					displayFormError(target, false, "Please enter a credit card number");
+					error = true;
 				} else if (target.value.length > 16 || target.value.length < 13) {
 					displayFormError(target, false, "Please specificy a valid credit card number between 13 and 16 digits");
+					error = true;
 				} else {
 					displayFormError(target, true);
 				}
@@ -262,6 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			if ($paymentSelect.value === "credit card") {
 				if (target.value === "" || target.value.length !== 5 ) {
 					displayFormError(target, false, "Please specificy a 5 digit valid zip code");
+					error = true;
 				} else {
 					displayFormError(target, true);
 				}
@@ -270,34 +280,30 @@ document.addEventListener("DOMContentLoaded", () => {
 			if ($paymentSelect.value === "credit card") {
 				if (target.value === "" || target.value.length !== 3 ) {
 					displayFormError(target, false, "Please specificy a valid 3 digit CVV");
+					error = true;
 				} else {
 					displayFormError(target, true);
 				}
 			}				
 		}
+		return error;
 	}
 
 	/**
 	 * Function used to validate form content
-	 * @return {[type]} [description]
-	 *
-	 * NEEDS TO CHECK FOR
-	 * [] name field (not blank)
-	 * [] email field (valid format)
-	 * [] activities (at least one selected)
-	 * [] payment
-	 * 		+ credit card number (13 - 16 digits, number)
-	 * 		+ zip (5 digits, number)
-	 * 		+ CVV (3 digit, number)
+	 * Only returns value when form is being submitted
+	 * @return {array} [returns an array of booleans indicating whether an error was encountered]
 	 */
 	function validateForm(type, target, message) {
 		if ( type === "submit" ) {
-			checkValid($nameInput);
-			checkValid($emailInput);
-			checkValid($activities);
-			checkValid($ccNumInput);
-			checkValid($zipInput);
-			checkValid($cvvInput);			
+			var errors = [];
+			errors.push(checkValid($nameInput));
+			errors.push(checkValid($emailInput));
+			errors.push(checkValid($activities));
+			errors.push(checkValid($ccNumInput));
+			errors.push(checkValid($zipInput));
+			errors.push(checkValid($cvvInput));
+			return errors;			
 		} else if ( type === "blur" ) {
 			checkValid(target);
 		} else if ( type === "keyup" ) {
@@ -421,7 +427,10 @@ document.addEventListener("DOMContentLoaded", () => {
 	})
 
 	$form.addEventListener("submit", (e) => {
-		validateForm(e.type);
+		var errors = validateForm(e.type);
+		if ( errors.includes(true) ) {
+			e.preventDefault();
+		}
 	})
 
 
