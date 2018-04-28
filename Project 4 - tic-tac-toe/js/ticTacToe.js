@@ -3,23 +3,58 @@ const ticTacToe = (function() {
 	// Declare variables
 	const $start = $( '#start' ),
 		  $board = $( '#board' ),
+		  $boxes = $board.find( ".boxes .box" ),
 		  $startBtn = $start.find( 'a.button' ),
 		  $playerNames = $start.find( '.player-name' ),
 		  $player1Scorecard = $board.find( '#player1' ),
 		  $player2Scorecard = $board.find( '#player2' ),
-		  $boxes = $board.find( ".boxes .box" ),
 		  players = [];
 
-	let activePlayer = {};
+	let activePlayer = {},
+			gameState = [];
 
 	/**
 	 * Function used to load the game's start screen
 	 */
-	const loadGame = () => {		
+	const loadGame = () => {
 		$board.hide();
 		$start.hide().fadeIn('slow');
-		//$start.hide();
-		//$board.hide().fadeIn('slow');
+		// $start.hide();
+		// $board.hide().fadeIn('slow');
+	}
+
+	/**
+	 * This function is used to set and maintain the state of the game
+	 * and keep track of the game score
+	 * @return {array} const [array containing representation of game board state]
+	 */
+	const setGameState = () => {
+		let arr = [];
+		$boxes.each(function(k) {
+				arr.push( $( this ).attr("data-value") );
+		})
+
+		let row1 = arr.filter((v,k) => k < 3 );
+		let row2 = arr.filter((v,k) => k >= 3 && k < 6 );
+		let row3 = arr.filter((v,k) => k >= 6 && k < 9 );
+		return [row1,row2,row3];
+	}
+
+	/**
+	 * This function is used to evalute the current state of the game board
+	 * @param  {[type]} gameState [description]
+	 * @return {[type]}           [description]
+	 */
+	const evaluateGameState = (gameState) => {
+		const rowChecks = gameState.map((row) => checkRow(row));
+
+		if ( rowChecks.some((row) => row === true)) {
+			alert ("game over")
+		}
+	}
+
+	const checkRow = (row) => {
+		return row.every((box) => box === "x") || row.every((box) => box === "o");
 	}
 
 	/**
@@ -27,7 +62,7 @@ const ticTacToe = (function() {
 	 * Calls the createPlayers function to create game players
 	 */
 	const startGame = () => {
-		createPlayers();		
+		createPlayers();
 		$start.fadeOut();
 		$board.fadeIn();
 		initializeBoard();
@@ -58,6 +93,9 @@ const ticTacToe = (function() {
 		$player1Scorecard.addClass("active");
 		$player1Scorecard.find( ".player-name-label" ).text(players[0].name );
 		$player2Scorecard.find( ".player-name-label" ).text(players[1].name );
+		$boxes.each(function() {
+			$( this ).attr("data-value", "unchecked");
+		})
 		activePlayer = players[0];
 	}
 
@@ -85,14 +123,20 @@ const ticTacToe = (function() {
 		const $target = $( e.target ),
 			  type = e.type.toLowerCase();
 
-		if ( type === "mouseover" ) {
+		if ( type === "mouseover" && !$target.hasClass('box-filled') ) {
 			$target.addClass( activePlayer.symbolClassHollow );
-		} else if ( type === "mouseout" ) {
+		} else if ( type === "mouseout"  && !$target.hasClass('box-filled')) {
 			$target.removeClass( activePlayer.symbolClassHollow );
 		}
 
-		if ( type === "click" ) {
+		// check to see if box has already been selected
+		if ( type === "click" && !$target.hasClass('box-filled')) {
+			$target.removeClass( activePlayer.symbolClassHollow );
 			$target.addClass( activePlayer.symbolClassFilled );
+			$target.addClass( 'box-filled' );
+			$target.attr("data-value", activePlayer.symbol);
+			gameState = setGameState();
+			evaluateGameState(gameState);
 			switchPlayer();
 		}
 	}
@@ -100,7 +144,7 @@ const ticTacToe = (function() {
 	/**
 	 * This function is used to bind all events for the game
 	 */
-	const bindEvents = (() => {		
+	const bindEvents = (() => {
 		$startBtn.on("click", startGame);
 		$boxes.on("click mouseover mouseout", setBoxState);
 	})();
