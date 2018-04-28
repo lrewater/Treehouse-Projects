@@ -47,14 +47,33 @@ const ticTacToe = (function() {
 	 */
 	const evaluateGameState = (gameState) => {
 		const rowChecks = gameState.map((row) => checkRow(row));
+		const cols = checkColumns(gameState);
+		console.log(cols)
+		const colChecks = cols.map((row) => checkRow(row));
+		console.log(colChecks)
 
-		if ( rowChecks.some((row) => row === true)) {
+		if ( rowChecks.some((row) => row === true) || colChecks.some((col) => col === true)) {
 			alert ("game over")
 		}
 	}
 
 	const checkRow = (row) => {
 		return row.every((box) => box === "x") || row.every((box) => box === "o");
+	}
+
+	const checkColumns = (gameState) => {
+		let cols = [],
+				col1 = [],
+				col2 = [],
+				col3 = [];
+
+		gameState.forEach(function(v,k) {
+			col1.push(v.filter((row, index) => index === 0)[0]);
+			col2.push(v.filter((row, index) => index === 1)[0]);
+			col3.push(v.filter((row, index) => index === 2)[0]);
+		})
+		cols = [col1,col2,col3];
+		return cols;
 	}
 
 	/**
