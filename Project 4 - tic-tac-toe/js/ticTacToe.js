@@ -3,6 +3,7 @@ const ticTacToe = (function() {
 	// Declare variables
 	const $start = $( '#start' ),
 		  $board = $( '#board' ),
+			$finish = $( '#finish' ),
 		  $boxes = $board.find( ".boxes .box" ),
 		  $startBtn = $start.find( 'a.button' ),
 		  $playerNames = $start.find( '.player-name' ),
@@ -18,9 +19,28 @@ const ticTacToe = (function() {
 	 */
 	const loadGame = () => {
 		$board.hide();
+		$finish.hide();
 		$start.hide().fadeIn('slow');
 		// $start.hide();
 		// $board.hide().fadeIn('slow');
+	}
+
+	/**
+	 * This function is used to determine if the game is complete
+	 * aka if every box has been checked
+	 * @param  {array} gameState [array representation of the game board]
+	 * @return {string}           [string indicating whether the game is complete or incomplete]
+	 */
+	const checkGameCompletion = (gameState) => {
+		let state = "incomplete";
+		const arr = gameState.reduce((acc, cur) => {
+			return acc.concat(cur);
+		})
+
+		if ( !arr.some((a) => a === "unchecked") ) {
+			state = "complete";
+		}
+		return state;
 	}
 
 	/**
@@ -42,38 +62,89 @@ const ticTacToe = (function() {
 
 	/**
 	 * This function is used to evalute the current state of the game board
-	 * @param  {[type]} gameState [description]
+	 * @param  {[type]} gameState [array representation of the game board]
 	 * @return {[type]}           [description]
 	 */
 	const evaluateGameState = (gameState) => {
-		const rowChecks = gameState.map((row) => checkRow(row));
-		const cols = checkColumns(gameState);
-		console.log(cols)
-		const colChecks = cols.map((row) => checkRow(row));
-		console.log(colChecks)
+		const rowChecks = gameState.map((row) => checkRow(row)),
+					cols = colsToRows(gameState),
+					colChecks = cols.map((row) => checkRow(row)),
+					diagonals = diagonalsToRows(gameState),
+					diagonalChecks = diagonals.map((row) => checkRow(row));
 
-		if ( rowChecks.some((row) => row === true) || colChecks.some((col) => col === true)) {
-			alert ("game over")
+		// Combine all checks into one array
+		const evaluatedGameState = rowChecks.concat(colChecks,diagonalChecks);
+
+		// Check if a player has won
+		if ( evaluatedGameState.includes("X wins") ) {
+			alert("X Wins. Game over");
+		} else if ( evaluatedGameState.includes("O wins") ) {
+			alert("O Wins. Game over");
+		} else if ( checkGameCompletion(gameState) === "complete" ) {
+			alert("Draw. Game over");
 		}
 	}
 
+	/**
+	 * This function is used to check if a game board row contains 3 Xs or 3 Os
+	 * @param  {array} row [array representing game board row]
+	 * @return {boolean}     [boolean indicating whether 3 Xs or 3 Os were found]
+	 */
 	const checkRow = (row) => {
-		return row.every((box) => box === "x") || row.every((box) => box === "o");
+		let state;
+
+		if ( row.every((box) => box === "x") ) {
+			state = "X wins";
+		} else if ( row.every((box) => box === "o") ) {
+			state = "O wins";
+		} else {
+			state = false;
+		}
+		return state;
 	}
 
-	const checkColumns = (gameState) => {
-		let cols = [],
+	/**
+	 * This function is used to convert the game board columns to rows
+	 * @param  {array} row [array representation of the game board]
+	 * @return {array}     [returns the game state but transposed]
+	 */
+	const colsToRows = (gameState) => {
+		let rows = [],
 				col1 = [],
 				col2 = [],
 				col3 = [];
 
-		gameState.forEach(function(v,k) {
+		gameState.forEach((v,k) => {
 			col1.push(v.filter((row, index) => index === 0)[0]);
 			col2.push(v.filter((row, index) => index === 1)[0]);
 			col3.push(v.filter((row, index) => index === 2)[0]);
-		})
-		cols = [col1,col2,col3];
-		return cols;
+		});
+		rows = [col1,col2,col3];
+		return rows;
+	}
+
+	/**
+	 * This function is used to convert the game board diagonals to rows
+	 * @param  {array} row [array representation of the game board]
+	 * @return {array}     [returns the game state but transposed]
+	 */
+	const diagonalsToRows = (ganeState) => {
+		let rows = [],
+				diagonal1 = [],
+				diagonal2 = [];
+
+		// Create first diagonal array
+		gameState.forEach((v,k) => {
+			diagonal1.push(v[k]);
+		});
+
+		// Create second diagonal array
+		gameState.forEach((v,k) => {
+			diagonal2.push(v[(gameState.length - 1) - k]);
+		});
+
+		rows = [diagonal1, diagonal2];
+		return rows;
 	}
 
 	/**
