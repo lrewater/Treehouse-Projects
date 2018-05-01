@@ -6,7 +6,7 @@ const ticTacToe = (function() {
 			$finish = $( '#finish' ),
 		  $boxes = $board.find( ".boxes .box" ),
 		  $startBtn = $start.find( 'a.button' ),
-		  $playerNames = $start.find( '.player-name' ),
+		  $playerName = $start.find( '.player-name' ),
 		  $player1Scorecard = $board.find( '#player1' ),
 		  $player2Scorecard = $board.find( '#player2' ),
 		  players = [];
@@ -128,7 +128,7 @@ const ticTacToe = (function() {
 	 * @param  {array} row [array representation of the game board]
 	 * @return {array}     [returns the game state but transposed]
 	 */
-	const diagonalsToRows = (ganeState) => {
+	const diagonalsToRows = (gameState) => {
 		let rows = [],
 				diagonal1 = [],
 				diagonal2 = [];
@@ -147,6 +147,41 @@ const ticTacToe = (function() {
 		return rows;
 	}
 
+	const computerMove = (gameState) => {
+		if ( activePlayer.name === "Computer" ) {
+			const possibleMoves = getOpenBoxes(gameState),
+						randomNo = Math.floor(Math.random() * possibleMoves.length);
+
+			const nextMove = possibleMoves[randomNo];
+			console.log($boxes[nextMove.index])
+
+			$( $boxes[nextMove.index] ).removeClass( activePlayer.symbolClassHollow );
+			$( $boxes[nextMove.index] ).addClass( activePlayer.symbolClassFilled );
+			$( $boxes[nextMove.index] ).addClass( 'box-filled' );
+			$( $boxes[nextMove.index] ).attr("data-value", activePlayer.symbol);
+			gameState = setGameState();
+			evaluateGameState(gameState);
+			switchPlayer();
+			setTimeout(() => computerMove(gameState), 500);
+		}
+	}
+
+	const getOpenBoxes = (gameState) => {
+		const gameStateFlattened = gameState.reduce((acc, cur) => {
+			return acc.concat(cur);
+		})
+
+		const possibleMoves = gameStateFlattened
+			.map((move,index) => {
+				return {
+					index: index,
+					state: move
+				}
+			})
+			.filter((move) => move.state === "unchecked");
+		return possibleMoves;
+	}
+
 	/**
 	 * Function used to start the game when the user clicks the start button
 	 * Calls the createPlayers function to create game players
@@ -162,17 +197,21 @@ const ticTacToe = (function() {
 	 * This function is used to create the game's players
 	 */
 	const createPlayers = () => {
-		$playerNames.each((k,v) => {
-			players.push({
-				name: $( v ).val(),
-				symbol: $( v ).attr("symbol"),
-				playerNo: k+1
-			})
+		players.push({
+			name: $playerName.val(),
+			symbol: $playerName.attr("symbol"),
+			playerNo: 1,
+			symbolClassHollow: "box-hollow-1",
+			symbolClassFilled: "box-filled-1"
 		})
-		players[0].symbolClassHollow = "box-hollow-1";
-		players[1].symbolClassHollow = "box-hollow-2";
-		players[0].symbolClassFilled = "box-filled-1";
-		players[1].symbolClassFilled = "box-filled-2";
+
+		players.push({
+			name: "Computer",
+			symbol: "x",
+			playerNo: 2,
+			symbolClassHollow: "box-hollow-2",
+			symbolClassFilled: "box-filled-2"
+		})
 	}
 
 	/**
@@ -228,6 +267,7 @@ const ticTacToe = (function() {
 			gameState = setGameState();
 			evaluateGameState(gameState);
 			switchPlayer();
+			setTimeout(() => computerMove(gameState), 500);
 		}
 	}
 
