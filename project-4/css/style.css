@@ -65,7 +65,7 @@ h1 {
       line-height: 0;
       z-index: -1; }
   .screen-win-tie {
-    background: #54D17A; }   
+    background: #54D17A; }
   .screen-win-one {
     background: #FFA000; }
     .screen-win-one .button {
@@ -125,7 +125,7 @@ h1 {
     padding: 1.75em;
     cursor: pointer;
     box-sizing: border-box;
-    transition: 0.2s ease; 
+    transition: 0.2s ease;
     background-size: 100px 100px;
     background-repeat: no-repeat;
     background-position: center center;}
@@ -148,7 +148,7 @@ h1 {
 
 /*//////////////////////////////////////////////////////////
   STYLES ADDED BY BT
-/////////////////////////////////////////////////////// */ 
+/////////////////////////////////////////////////////// */
 
 #start label {
   color: #FFF;
@@ -182,9 +182,15 @@ h1 {
   background-color: rgba(255,255,255,0.15);
 }
 
-
 .player-name-label {
   color: #333;
   font-weight: bold;
   margin-bottom: 10px;
+}
+
+.active .player-name-label { color: #FFF; }
+
+.player-name-hint {
+  color: #FFF;
+  margin-bottom: 25px;
 }

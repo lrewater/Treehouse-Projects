@@ -9,6 +9,7 @@ const ticTacToe = (function() {
 		  $playerName = $start.find( '.player-name' ),
 		  $player1Scorecard = $board.find( '#player1' ),
 		  $player2Scorecard = $board.find( '#player2' ),
+			$newGameBtn = $finish.find( 'a.button' ),
 		  players = [];
 
 	let activePlayer = {},
@@ -23,6 +24,13 @@ const ticTacToe = (function() {
 		$start.hide().fadeIn('slow');
 		// $start.hide();
 		// $board.hide().fadeIn('slow');
+	}
+
+	/**
+	 * Function used to load the game's start screen
+	 */
+	const resetGame = () => {
+	
 	}
 
 	/**
@@ -70,18 +78,26 @@ const ticTacToe = (function() {
 					cols = colsToRows(gameState),
 					colChecks = cols.map((row) => checkRow(row)),
 					diagonals = diagonalsToRows(gameState),
-					diagonalChecks = diagonals.map((row) => checkRow(row));
+					diagonalChecks = diagonals.map((row) => checkRow(row)),
+					$message = $finish.find( '.message' );
 
 		// Combine all checks into one array
 		const evaluatedGameState = rowChecks.concat(colChecks,diagonalChecks);
 
 		// Check if a player has won
-		if ( evaluatedGameState.includes("X wins") ) {
-			alert("X Wins. Game over");
-		} else if ( evaluatedGameState.includes("O wins") ) {
-			alert("O Wins. Game over");
+		if ( evaluatedGameState.includes("O wins") ) {
+			$board.hide()
+			$finish.addClass('screen-win-one');
+			$message.text(`${players[0].name} wins!`);
+			$finish.fadeIn('slow');
+		} else if ( evaluatedGameState.includes("X wins") ) {
+			$finish.addClass('screen-win-two');
+			$message.text(`${players[1].name} wins!`);
+			$finish.fadeIn('slow');
 		} else if ( checkGameCompletion(gameState) === "complete" ) {
-			alert("Draw. Game over");
+			$finish.addClass('screen-win-tie');
+			$message.text(`It's a draw!`);
+			$finish.fadeIn('slow');
 		}
 	}
 
@@ -148,12 +164,11 @@ const ticTacToe = (function() {
 	}
 
 	const computerMove = (gameState) => {
-		if ( activePlayer.name === "Computer" ) {
+		if ( activePlayer.computer ) {
 			const possibleMoves = getOpenBoxes(gameState),
 						randomNo = Math.floor(Math.random() * possibleMoves.length);
 
 			const nextMove = possibleMoves[randomNo];
-			console.log($boxes[nextMove.index])
 
 			$( $boxes[nextMove.index] ).removeClass( activePlayer.symbolClassHollow );
 			$( $boxes[nextMove.index] ).addClass( activePlayer.symbolClassFilled );
@@ -162,7 +177,7 @@ const ticTacToe = (function() {
 			gameState = setGameState();
 			evaluateGameState(gameState);
 			switchPlayer();
-			setTimeout(() => computerMove(gameState), 500);
+			setTimeout(() => computerMove(gameState), 300);
 		}
 	}
 
@@ -197,20 +212,21 @@ const ticTacToe = (function() {
 	 * This function is used to create the game's players
 	 */
 	const createPlayers = () => {
-		players.push({
-			name: $playerName.val(),
-			symbol: $playerName.attr("symbol"),
-			playerNo: 1,
-			symbolClassHollow: "box-hollow-1",
-			symbolClassFilled: "box-filled-1"
-		})
+		$playerName.each(function(k,v) {
+			const $player = $( v );
+			players.push({
+				name: $player.val() || `Player ${k+1}`,
+				symbol: $player.attr("symbol"),
+				playerNo: k+1,
+				symbolClassHollow: `box-hollow-${k+1}`,
+				symbolClassFilled: `box-filled-${k+1}`,
+				computer: false
+			})
 
-		players.push({
-			name: "Computer",
-			symbol: "x",
-			playerNo: 2,
-			symbolClassHollow: "box-hollow-2",
-			symbolClassFilled: "box-filled-2"
+			// If the name for player 2 is undefined player 2 should be a computer
+			if ( k === 1 && $player.val() === "" ) {
+				players[k].computer = true;
+			}
 		})
 	}
 
@@ -267,7 +283,7 @@ const ticTacToe = (function() {
 			gameState = setGameState();
 			evaluateGameState(gameState);
 			switchPlayer();
-			setTimeout(() => computerMove(gameState), 500);
+			setTimeout(() => computerMove(gameState), 300);
 		}
 	}
 
@@ -276,6 +292,7 @@ const ticTacToe = (function() {
 	 */
 	const bindEvents = (() => {
 		$startBtn.on("click", startGame);
+		$newGameBtn.on("click", resetGame;
 		$boxes.on("click mouseover mouseout", setBoxState);
 	})();
 
