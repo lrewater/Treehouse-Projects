@@ -28,6 +28,19 @@ body {
 
 .text-center { text-align: center; }
 
+#search {
+  width: 40%;
+  padding: 12px 8px;
+  border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border: 1px solid #DDD;
+}
+
+#search:focus {
+  outline: none;
+}
+
 .employee-card-wrapper {
   width: 33.3%;
   float: left;
