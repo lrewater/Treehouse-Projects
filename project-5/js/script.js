@@ -1,9 +1,24 @@
+
+/**
+ * Create a Search class that can easily be used to filter employees
+ */
 class Search {
+
+  /**
+   * Constructor function to initialize Search properties
+   * @param {[object]} options [configuration options for search]
+   */
   constructor(options) {
     this.container = document.querySelector(options.container);
     this.data = options.data;
   }
 
+  /**
+   * This method is used to filter the employees data based on the search input value
+   * Is case-insensitive
+   * Filters on name and username
+   * @return {array} [returns an array of employees that match search criteria]
+   */
   search() {
     const val = this.container.value.toLowerCase();
     return this.data
@@ -58,12 +73,55 @@ class Employee {
     $employeeCard.addEventListener("click", this.createModal.bind(this));
   }
 
+  /**
+   * This function is used to remove an employee card
+   * @return {[type]} [description]
+   */
   removeCard() {
     this.container.remove();
   }
 
   /**
+   * This function is used to return the previous employee in the directory
+   * @return {object} [returns the previous Employee object]
+   */
+  previousEmployee() {
+    const currentEmployeeIndex = filteredEmployees
+      .map((employee) => employee.name)
+      .indexOf(this.name);
+
+    // Conditional statement to check if current employee is the first in array
+    // If it is show the last employee
+    // Else, show the previous employee
+    if ( currentEmployeeIndex === 0 ) {
+      return filteredEmployees[filteredEmployees.length-1];
+    } else {
+      return filteredEmployees[currentEmployeeIndex-1];
+    }
+  }
+
+  /**
+   * This function is used to return the next employee in the directory
+   * @return {object} [returns the next Employee object]
+   */
+  nextEmployee() {
+    const currentEmployeeIndex = filteredEmployees
+      .map((employee) => employee.name)
+      .indexOf(this.name);
+
+    // Conditional statement to check if current employee is the last in array
+    // If it is show the first employee
+    // Else, show the next employee
+    if ( currentEmployeeIndex === filteredEmployees.length - 1 ) {
+      return filteredEmployees[0];
+    } else {
+      return filteredEmployees[currentEmployeeIndex+1];
+    }
+  }
+
+  /**
    * This method is used to the generate the HTML for an employee modal and append it to the page
+   * It additionally binds events for the close and previous/next navigation buttons
    * @return {[type]} [description]
    */
   createModal() {
@@ -86,15 +144,38 @@ class Employee {
       <div class="modal-employee-cell">${this.cell}</div>
       <div class="modal-employee-address">${this.detailedAddress}</div>
       <div class="modal-employee-birthday">Birthday: ${this.birthday}</div>
+      <div class="modal-navigation margin-top">
+        <button class="modal-navigation-btn" id="prev-employee-btn">Previous Employee</button>
+        <button class="modal-navigation-btn" id="next-employee-btn">Next Employee</button>
+      </div>
     `;
 
     body.appendChild($backdrop);
     body.appendChild($modal);
 
+    // Define behavior when the user clicks the close button
     const $closeBtn = $modal.querySelector(".modal-close-btn");
     $closeBtn.addEventListener("click", (e) => {
       $modal.remove();
       $backdrop.remove();
+    })
+
+    // Define behavior when the user clicks the previous employee button
+    const $prevEmployeeBtn = $modal.querySelector("#prev-employee-btn");
+    $prevEmployeeBtn.addEventListener("click", (e) => {
+      const previousEmployee = this.previousEmployee();
+      $modal.remove();
+      $backdrop.remove();
+      previousEmployee.createModal();
+    })
+
+    // Define behavior when the user clicks the next employee button
+    const $nextEmployeeBtn = $modal.querySelector("#next-employee-btn");
+    $nextEmployeeBtn.addEventListener("click", (e) => {
+      const nextEmployee = this.nextEmployee();
+      $modal.remove();
+      $backdrop.remove();
+      nextEmployee.createModal();
     })
   }
 }
@@ -141,11 +222,18 @@ const formatDate = (date) => {
   return `${newDate.getMonth()}/${newDate.getDate()}/${newDate.getFullYear()}`;
 }
 
+/**
+ * Create a search bar for the directory
+ * @type {Search}
+ */
 const directorySearch = new Search({
   container: "#search",
   data: []
 })
 
+/**
+ * Bind events for the application
+ */
 const bindEvents = (() => {
   directorySearch.container.addEventListener("keyup", (e) => {
     const filteredData = directorySearch.search();
@@ -154,7 +242,7 @@ const bindEvents = (() => {
     const filteredUsernames = filteredData
       .map((d) => d.username );
 
-    const filteredEmployees = employees
+    filteredEmployees = employees
       .filter((employee) => {
         return filteredNames.includes(employee.name) || filteredUsernames.includes(employee.username)
       });
@@ -164,7 +252,9 @@ const bindEvents = (() => {
   })
 })();
 
-const employees = [];
+// Create an empty array that will hold the employees in the directory
+let employees = [],
+    filteredEmployees = [];
 
 /**
  * Create 12 employees
@@ -174,4 +264,5 @@ for ( let i = 0; i < 12; i++) {
     .then((data) => {
       employees.push(createEmployee(data));
     });
+  filteredEmployees = employees;
 }

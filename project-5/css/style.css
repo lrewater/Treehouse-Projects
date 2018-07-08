@@ -144,6 +144,8 @@ body {
   height: 125px;
   background-color: #E9E9E9;
   border-radius: 50%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
 }
 
 .modal-employee-name {
@@ -161,4 +163,31 @@ body {
   margin-top: 10px;
   color: #656565;
   font-size: 1rem;
+}
+
+.modal-navigation-btn {
+  background-color: #15cc09;
+  border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  padding: 10px;
+}
+
+.modal-navigation-btn:hover,
+.modal-navigation-btn:focus,
+.modal-navigation-btn:active {
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+#prev-employee-btn {
+  background-color: #53b6f0;
+  border: 1px solid #53b6f0;
+  color: #FFF;
+}
+
+#next-employee-btn {
+  background-color: #48b94b;
+  border: 1px solid #48b94b;
+  color: #FFF;
 }
