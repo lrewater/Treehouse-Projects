@@ -182,10 +182,11 @@ class Employee {
 
 /**
  * This function is used to fetch the employee data from the random user api
+ * Fetches data only for nationalities that use the english alphabet
  * @return {object} [returns the response from the random user api as JSON]
  */
 const fetchEmployee = () => {
-  return fetch('https://randomuser.me/api/?nat=us')
+  return fetch('https://randomuser.me/api/?nat=us,gb,au,ca,ie,nz')
     .then((response) => {
       return response.json();
     })
