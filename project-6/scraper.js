@@ -122,7 +122,7 @@ function createCSV(data) {
  * If the specified directory does not exist it is created
  * @param  {string} dir [name of directory to check for]
  */
-function checkDir(dir) {
+function checkDir(dir, callback) {
   fs.open(dir, 'r', (err, fd) => {
     if (err) {
       if (err.code === 'ENOENT') {
@@ -138,10 +138,10 @@ function checkDir(dir) {
  * @param  {string} dir [name of directory to create]
  */
 function createDirectory(dir) {
-  fs.mkdir('./data/', err => {
+  fs.mkdir(dir, err => {
     if (err) {
       if (err.code === 'ENOENT') {
-        console.error('The data directory could not be created.');
+        console.error('The directory could not be created.');
         writeToErrorLog(error);
         return;
       }
